@@ -4,6 +4,7 @@ environment = [
     'pandas==1.3.4',
     'numpy==1.21.2',
     'spacy==2.1.0',
+    'neuralcoref==4.0'
 ]
 
 setup(name='Coref-medialab',
