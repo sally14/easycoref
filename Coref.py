@@ -5,14 +5,6 @@ import os
 import re
 import numpy as np
 import json
-
-import pandas as pd
-import tempfile
-import json
-import os
-import re
-import numpy as np
-import json
 import spacy
 import logging;
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +20,7 @@ class CorefModel:
         return None
 
 
-    def import_dataset(self,path,colnames):
+    def import_dataset(self,path,colnames, filetype='csv'):
         """
         Import the dataset of interest, check if colnames is at the right format and set dataset and colnames attributes
         Args:
@@ -38,8 +30,13 @@ class CorefModel:
                 columns of the dataset for which we want to predict coreference chain
         Returns:
             df: dataset
-        """   
-        df = pd.read_csv(path)
+        """ 
+        if filetype=="csv":
+            df = pd.read_csv(path)
+        elif filetype=="jsonl":
+            df = pd.read_json(path, orient='records', lines=True)
+        else:
+            raise ValueError(f'Type of file {path} is not handled. Filetype must be csv or jsonl')
         self.df = df
         # Check if the columns are at the right format and set attribute colnames
         if type(colnames) == list :
@@ -294,18 +291,19 @@ class CorefModel:
         # Call the temporary file used for method __transform_e2ecoref__ (which create the file used for evaluation)
         datapath = self.fp1.name 
         # Create new temporary file for evaluation output
-        self.fp2 = tempfile.NamedTemporaryFile(encoding='utf-8')
+        self.fp2 = tempfile.NamedTemporaryFile(mode='ab')
         output = self.fp2.name
 
         # Prediction using e2eCoref
-        os.system(f'python predict.py final {datapath} {output}')
+        os.system(f'python ./e2e-coref/predict.py final {datapath} {output}')
         self.fp1.close()
 
-        df_coref = pd.read_json(output, orient='records', lines=True)
-        self.df_coref[col] = df_coref
+        df_coref = pd.read_json(output, orient='records', lines=True, encoding='utf-8')
+        setattr(self, f'df_coref_{col}', df_coref)
+        #self.df_coref[col] = df_coref
         self.fp2.close()
 
-        return self.df_coref[col]
+        return getattr(self, f'df_coref_{col}')
 
 
     def inference(self,model):
