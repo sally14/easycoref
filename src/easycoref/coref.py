@@ -20,7 +20,7 @@ class CorefModel:
         return None
 
 
-    def import_dataset(self,path,colnames, filetype='csv'):
+    def import_dataset(self,path,colnames):
         """
         Import the dataset of interest, check if colnames is at the right format and set dataset and colnames attributes
         Args:
@@ -30,7 +30,7 @@ class CorefModel:
                 columns of the dataset for which we want to predict coreference chain
         Returns:
             df: dataset
-        """ 
+        """   
         if filetype=="csv":
             df = pd.read_csv(path)
         elif filetype=="jsonl":
@@ -157,14 +157,20 @@ class CorefModel:
         # Create a list of sentences
         liste_sentence = self.__split_into_sentences__(text)
 
-        # Transform each sentence to a list of words and create a list of empty strings
-        for sentence in liste_sentence :
-            liste_mot = list(sentence.split(" ")) 
-            liste_speak = ["" for i in liste_mot]
+        # Case only one sentence
+        if liste_sentence == [] :
+          liste_formate = [list(text.split(" "))]
+          liste_speaker = ["" for i in liste_formate]
 
-            # Add them to the "global" list
-            liste_formate.append(liste_mot)
-            liste_speaker.append(liste_speak)
+        else :
+            # Transform each sentence to a list of words and create a list of empty strings
+            for sentence in liste_sentence :
+                liste_mot = list(sentence.split(" ")) 
+                liste_speak = ["" for i in liste_mot]
+
+                # Add them to the "global" list
+                liste_formate.append(liste_mot)
+                liste_speaker.append(liste_speak)
 
         return [liste_formate, liste_speaker]
 
@@ -224,15 +230,13 @@ class CorefModel:
         # For each text of the column create a dico under the right format
         for text in self.df[col]:
             dicos_list.append(self.__dico__(text))
-        print(dicos_list)
+
         # Saving the dataset under a json temporary file 
         self.fp1 = tempfile.NamedTemporaryFile(mode='ab')
         datapath = self.fp1.name
-        print(datapath)
+  
         # For each line of the dictionnary
         for dico in dicos_list :
-            print(type(dico))
-            print(dico)
             self.fp1.write(bytes(json.dumps(dico), 'utf-8'))
             self.fp1.write(b'\n')
         
@@ -295,12 +299,11 @@ class CorefModel:
         output = self.fp2.name
 
         # Prediction using e2eCoref
-        os.system(f'python ./e2e-coref/predict.py final {datapath} {output}')
+        os.system(f'python predict.py final {datapath} {output}')
         self.fp1.close()
 
         df_coref = pd.read_json(output, orient='records', lines=True, encoding='utf-8')
         setattr(self, f'df_coref_{col}', df_coref)
-        #self.df_coref[col] = df_coref
         self.fp2.close()
 
         return getattr(self, f'df_coref_{col}')
@@ -707,16 +710,16 @@ class CorefModel:
             self.df_standardized = self.df_results
 
             # Build columns span_positions_col 
-            for col in self.colnames :
+            for col in self.colnames:
 
                 # Create column giving the string positions of the mentions of coreference chains of each text
                 column_str_pos = []
 
-                for i in range(len(self.df_standardized)):
+                for i in range(len(self.df_useful)):
                     # List of lists : string positions of every mention of every cluster for one text
                     text_str_pos = []
 
-                    for cluster in self.df_standardized[f'clusters_{col}'][i] :
+                    for cluster in self.df_useful[f'predicted_clusters_{col}'][i] :
                         # List of string positions of every mention of one cluster
                         cluster_str_pos = []
 
@@ -725,6 +728,7 @@ class CorefModel:
                             start = positions[0]
                             end = positions[1]+1
                             positions_corr = [start,end]
+
                             mention = self.df_useful[f'text_list_{col}'][i][start:end]
                             mention_str = " ".join(mention)
                     
@@ -746,7 +750,7 @@ class CorefModel:
 
                 # Thanks to that new column, create column giving the spans positions of the mentions of coreference chains of each text
                 column_span_pos = []
-                for i in range(len(self.df_standardized)):
+                for i in range(len(self.df_useful)):
                     text_span_pos = []
                     for cluster in self.df_useful[f'str_pos_{col}'][i] :
                         cluster_span_pos = []
@@ -757,6 +761,7 @@ class CorefModel:
                             pos = self.__position_str_to_span__(start,end,texte)
                     
                             cluster_span_pos.append(pos)
+
                         # Add the cluster list of mention positions for each cluster 
                         text_span_pos.append(cluster_span_pos)
 
@@ -811,6 +816,8 @@ class CorefModel:
             clusters_positions = self.df_standardized[f'span_positions_{col}'][i]
             
             for cluster in clusters_positions :
+                color += 1
+                
                 if len(cluster)>1 :
                     for positions in cluster :
 
@@ -850,5 +857,4 @@ class CorefModel:
                 return texte
 
     
- 
  
