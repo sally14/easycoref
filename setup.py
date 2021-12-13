@@ -14,8 +14,8 @@ class PostDevelopCommand(develop):
         returncode = process.wait()
         print('ping returned {0}'.format(returncode))
         print(process.stdout.read())
-        subprocess.check_call("python -m spacy download en".split())
-        subprocess.check_call("bash install_coref.sh".split())
+        # subprocess.check_call("python -m spacy download en".split())
+        # subprocess.check_call("bash install_coref.sh".split())
         
         process = subprocess.Popen("bash install_coref.sh".split(),
                           stdout=subprocess.PIPE,
@@ -37,8 +37,8 @@ class PostInstallCommand(install):
         returncode = process.wait()
         print('ping returned {0}'.format(returncode))
         print(process.stdout.read())
-        check_call("python -m spacy download en".split())
-        check_call("bash install_coref.sh".split())
+        # subprocess.check_call("python -m spacy download en".split())
+        # subprocess.check_call("bash install_coref.sh".split())
         
         process = subprocess.Popen("bash install_coref.sh".split(),
                           stdout=subprocess.PIPE,
