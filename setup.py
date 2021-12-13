@@ -4,48 +4,48 @@ from setuptools.command.install import install
 import subprocess
 
 
-#class PostDevelopCommand(develop):
-#    """Post-installation for development mode."""
-#    def run(self):
-        #develop.run(self)
-        #process = subprocess.Popen("python -m spacy download en".split(),
-        #                   stdout=subprocess.PIPE,
-        #                   stderr=subprocess.STDOUT)
-        #returncode = process.wait()
-        #print('ping returned {0}'.format(returncode))
-        #print(process.stdout.read())
-        #subprocess.check_call("python -m spacy download en".split())
-        #subprocess.check_call("bash install_coref.sh".split())
+class PostDevelopCommand(develop):
+   """Post-installation for development mode."""
+   def run(self):
+        develop.run(self)
+        process = subprocess.Popen("python -m spacy download en".split(),
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT)
+        returncode = process.wait()
+        print('ping returned {0}'.format(returncode))
+        print(process.stdout.read())
+        subprocess.check_call("python -m spacy download en".split())
+        subprocess.check_call("bash install_coref.sh".split())
         
-        #process = subprocess.Popen("bash install_coref.sh".split(),
-        #                   stdout=subprocess.PIPE,
-        #                   stderr=subprocess.STDOUT)
-        #returncode = process.wait()
-        #print('ping returned {0}'.format(returncode))
-        #print(process.stdout.read())
+        process = subprocess.Popen("bash install_coref.sh".split(),
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT)
+        returncode = process.wait()
+        print('ping returned {0}'.format(returncode))
+        print(process.stdout.read())
 
 
 
-#class PostInstallCommand(install):
-#    """Post-installation for installation mode."""
-#    def run(self):
-        #install.run(self)
+class PostInstallCommand(install):
+   """Post-installation for installation mode."""
+   def run(self):
+        install.run(self)
 
-        #process = subprocess.Popen("python -m spacy download en".split(),
-        #                   stdout=subprocess.PIPE,
-        #                   stderr=subprocess.STDOUT)
-        #returncode = process.wait()
-        #print('ping returned {0}'.format(returncode))
-        #print(process.stdout.read())
-        #check_call("python -m spacy download en".split())
-        #check_call("bash install_coref.sh".split())
+        process = subprocess.Popen("python -m spacy download en".split(),
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT)
+        returncode = process.wait()
+        print('ping returned {0}'.format(returncode))
+        print(process.stdout.read())
+        check_call("python -m spacy download en".split())
+        check_call("bash install_coref.sh".split())
         
-        #process = subprocess.Popen("bash install_coref.sh".split(),
-        #                   stdout=subprocess.PIPE,
-        #                   stderr=subprocess.STDOUT)
-        #returncode = process.wait()
-        #print('ping returned {0}'.format(returncode))
-        #print(process.stdout.read())
+        process = subprocess.Popen("bash install_coref.sh".split(),
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT)
+        returncode = process.wait()
+        print('ping returned {0}'.format(returncode))
+        print(process.stdout.read())
 
         
 environment = [
@@ -72,8 +72,8 @@ setup(name='Coref-medialab',
         author = "Clémentine Abed Meraim",
         description = ("A practical wrapper for neuralcoref and e2ecoref"),
         keywords = "coreference",
-        #cmdclass={
-        #    "develop": PostDevelopCommand,
-        #    "install": PostInstallCommand,
-        #    },
+        cmdclass={
+            "develop": PostDevelopCommand,
+            "install": PostInstallCommand,
+            },
      )
