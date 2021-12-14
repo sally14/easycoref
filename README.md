@@ -6,7 +6,7 @@ Clone this repo and go into the repo:
 
 ```bash
 git clone git@github.com:sally14/easycoref.git
-cd SourcedStatements
+cd easycoref
 ```
 
 Create a conda environment in order to isolate the packages needed to run neuralcoref and e2ecoref (we will need a specific version of python, don't mess up with your "root" python!)
