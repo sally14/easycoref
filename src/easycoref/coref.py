@@ -706,69 +706,74 @@ class CorefModel:
 
 
         elif model == "e2ecoref" :
-            # Dataframe with columns col and clusters_col
-            self.df_standardized = self.df_results
+          # Dataframe with columns col and clusters_col
+          self.df_standardized = self.df_results
 
-            # Build columns span_positions_col 
-            for col in self.colnames:
+          # Build columns span_positions_col 
+          for col in self.colnames:
 
-                # Create column giving the string positions of the mentions of coreference chains of each text
-                column_str_pos = []
+            # Create column giving the string positions of the mentions of coreference chains of each text
+            column_str_pos = []
 
-                for i in range(len(self.df_useful)):
-                    # List of lists : string positions of every mention of every cluster for one text
-                    text_str_pos = []
+            for i in range(len(self.df_useful)):
+              # List of lists : string positions of every mention of every cluster for one text
+              text_str_pos = []
 
-                    for cluster in self.df_useful[f'predicted_clusters_{col}'][i] :
-                        # List of string positions of every mention of one cluster
-                        cluster_str_pos = []
+              for cluster in self.df_useful[f'predicted_clusters_{col}'][i] :
+                
+                # List of string positions of every mention of one cluster
+                cluster_str_pos = []
 
-                        # Convert list positions to string positions
-                        for positions in cluster:
-                            start = positions[0]
-                            end = positions[1]+1
-                            positions_corr = [start,end]
+                # Convert list positions to string positions
+                for positions in cluster:
+               
+                  start = positions[0]
+                  end = positions[1]+1
+                  positions_corr = [start,end]
+                  
+                  mention = self.df_useful[f'text_list_{col}'][i][start:end]
+                  mention_str = " ".join(mention)
+            
+                              
+                  texte = self.df_standardized[col][i]
+                  
+                                      
+                  # Start string position of the mention
+                  pos_fin = self.__position_list_to_str__(positions_corr,mention_str,texte)
 
-                            mention = self.df_useful[f'text_list_{col}'][i][start:end]
-                            mention_str = " ".join(mention)
+                  # Add start and end string positions to the list 
+                  cluster_str_pos.append([pos_fin,pos_fin+len(mention_str)])
+
+                # Add the cluster list of mention positions for each cluster 
+                text_str_pos.append(cluster_str_pos)
+
+              # Add the list of lists for each text to the column
+              column_str_pos.append(text_str_pos)
+
+            self.df_useful[f'str_pos_{col}'] = column_str_pos
+        
+
+            # Thanks to that new column, create column giving the spans positions of the mentions of coreference chains of each text
+            column_span_pos = []
+            for i in range(len(self.df_useful)):
+              text_span_pos = []
+              for cluster in self.df_useful[f'str_pos_{col}'][i] :
+                cluster_span_pos = []
+                for pos_str in cluster :
+                  start = pos_str[0]
+                  end = pos_str[1]
+                  texte = self.df_standardized[col][i]
+                  pos = self.__position_str_to_span__(start,end,texte)
                     
-                            texte = self.df_standardized[col][i]
-                            
-                            # Start string position of the mention
-                            pos_fin = self.__position_list_to_str__(positions_corr,mention_str,texte)
-
-                            # Add start and end string positions to the list 
-                            cluster_str_pos.append([pos_fin,pos_fin+len(mention_str)])
-
-                        # Add the cluster list of mention positions for each cluster 
-                        text_str_pos.append(cluster_str_pos)
-
-                    # Add the list of lists for each text to the column
-                    column_str_pos.append(text_str_pos)
-
-                self.df_useful[f'str_pos_{col}'] = column_str_pos
-
-                # Thanks to that new column, create column giving the spans positions of the mentions of coreference chains of each text
-                column_span_pos = []
-                for i in range(len(self.df_useful)):
-                    text_span_pos = []
-                    for cluster in self.df_useful[f'str_pos_{col}'][i] :
-                        cluster_span_pos = []
-                        for pos_str in cluster :
-                            start = pos_str[0]
-                            end = pos_str[1]
-                            texte = self.df_standardized[col][i]
-                            pos = self.__position_str_to_span__(start,end,texte)
+                  cluster_span_pos.append(pos)
                     
-                            cluster_span_pos.append(pos)
+                # Add the cluster list of mention positions for each cluster 
+                text_span_pos.append(cluster_span_pos)
 
-                        # Add the cluster list of mention positions for each cluster 
-                        text_span_pos.append(cluster_span_pos)
+              # Add the list of lists for each text to the column  
+              column_span_pos.append(text_span_pos)
 
-                    # Add the list of lists for each text to the column  
-                    column_span_pos.append(text_span_pos)
-
-                self.df_standardized[f'span_positions_{col}']= column_span_pos
+            self.df_standardized[f'span_positions_{col}']= column_span_pos
             
         else:
             print('This model is not manageable with CorefModel')
@@ -776,7 +781,6 @@ class CorefModel:
 
         
         return self.df_standardized
-
 
 
 
@@ -797,64 +801,66 @@ class CorefModel:
                 text with all of it coreference chains underlined in different colors
         """
         if model not in ['neuralcoref', 'e2ecoref']:
-            print('This model is not manageable with CorefModel')
-            raise NameError
+          print('This model is not manageable with CorefModel')
+          raise NameError
         
         else:
-            self.df_standardized = self.__standardized_results__(model)
-            texte = self.df_standardized[col][i]
-            texte_or = texte 
-            nlp_texte = nlp(texte)
+          self.df_standardized = self.__standardized_results__(model)
+          texte = self.df_standardized[col][i]
+          texte_or = texte 
+          nlp_texte = nlp(texte)
                 
-            liste_charactere = [i for i in range(len(texte))]
-            liste_charactere_updated = [i for i in range(len(texte))]
+          liste_charactere = [i for i in range(len(texte))]
+          liste_charactere_updated = [i for i in range(len(texte))]
 
             # Font color
-            color = 0 
-            colors = 240 
+          color = 0 
+          colors = 240
 
-            clusters_positions = self.df_standardized[f'span_positions_{col}'][i]
+          clusters_positions = self.df_standardized[f'span_positions_{col}'][i]
             
-            for cluster in clusters_positions :
-                color += 1
+          for cluster in clusters_positions :
+            color += 1
+            
+            if len(cluster)>1 :
+              for positions in cluster :
+
+                # Positions in spans
+                mention_start = positions[0]
+                mention_end = positions[1]
+
+                # Mention in span
+                mention = nlp_texte[mention_start:mention_end]
+                # Mention in str
+                mention_str = (nlp_texte[mention_start:mention_end]).text 
+
+                # Mention start position in strings
+                index_position_start = self.__position_span_to_str__(mention,texte_or) 
+                position_start = liste_charactere_updated[index_position_start]
+                # Mention end position in strings
+                position_end = position_start+len(mention_str) 
+
+                # Text from beginning to mention
+                deb = texte[0: position_start] 
+                # End of the text
+                fin = texte[position_end:] 
+
+                # Rewrite the text
+                texte = deb + f'\033[38;5;{color}m' + f'\x1b[48;5;{colors}m' + mention_str + '\033[0;0m' + fin #on modifie texte en changeant la couleur de la mention
+                add1 = len(f'\033[38;5;{color}m') + len(f'\x1b[48;5;{colors}m')
+                add2 = len('\033[0;0m')
+
+
+                # Update positions of text element after adding add1
+                for i in range(index_position_start,len(liste_charactere_updated)): 
+                  liste_charactere_updated[i] += add1
+                # Update positions of text element after adding add2
+                for i in range(index_position_start+len(mention_str),len(liste_charactere_updated)): 
+                  liste_charactere_updated[i] += add2
                 
-                if len(cluster)>1 :
-                    for positions in cluster :
-
-                        # Positions in spans
-                        mention_start = positions[0]
-                        mention_end = positions[1]
-
-                        # Mention in span
-                        mention = nlp_texte[mention_start:mention_end]
-                        # Mention in str
-                        mention_str = (nlp_texte[mention_start:mention_end]).text 
-
-                        # Mention start position in strings
-                        index_position_start = self.__position_span_to_str__(mention,texte_or) 
-                        position_start = liste_charactere_updated[index_position_start]
-                        # Mention end position in strings
-                        position_end = position_start+len(mention_str) 
-
-                        # Text from beginning to mention
-                        deb = texte[0: position_start] 
-                        # End of the text
-                        fin = texte[position_end:] 
-
-                        # Rewrite the text
-                        texte = deb + f'\033[38;5;{color}m' + f'\x1b[48;5;{colors}m' + mention_str + '\033[0;0m' + fin #on modifie texte en changeant la couleur de la mention
-                        add1 = len(f'\033[38;5;{color}m') + len(f'\x1b[48;5;{colors}m')
-                        add2 = len('\033[0;0m')
-
-
-                        # Update positions of text element after adding add1
-                        for i in range(index_position_start,len(liste_charactere_updated)): 
-                            liste_charactere_updated[i] += add1
-                        # Update positions of text element after adding add2
-                        for i in range(index_position_start+len(mention_str),len(liste_charactere_updated)): 
-                            liste_charactere_updated[i] += add2
                 
-                return texte
+                
+        return texte
 
     
  
