@@ -20,7 +20,7 @@ class CorefModel:
         return None
 
 
-    def import_dataset(self,path,colnames):
+    def import_dataset(self,path,colnames, filetype='csv'):
         """
         Import the dataset of interest, check if colnames is at the right format and set dataset and colnames attributes
         Args:
@@ -291,7 +291,7 @@ class CorefModel:
                     - speakers : list of lists, gives speakers for each word, following previous "sentences" format
                     - predicted_clusters : list of lists, for each clusters of coreference chain found gives list of mention positions 
         """
-
+        os.chdir('./e2e-coref')
         # Call the temporary file used for method __transform_e2ecoref__ (which create the file used for evaluation)
         datapath = self.fp1.name 
         # Create new temporary file for evaluation output
@@ -299,13 +299,13 @@ class CorefModel:
         output = self.fp2.name
 
         # Prediction using e2eCoref
-        os.system(f'python predict.py final {datapath} {output}')
+        os.system(f'python ./predict.py final {datapath} {output}')
         self.fp1.close()
 
         df_coref = pd.read_json(output, orient='records', lines=True, encoding='utf-8')
         setattr(self, f'df_coref_{col}', df_coref)
         self.fp2.close()
-
+        os.chdir('..')
         return getattr(self, f'df_coref_{col}')
 
 
