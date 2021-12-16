@@ -5,7 +5,7 @@
 Clone this repo and go into the repo:
 
 ```bash
-git clone git@github.com:sally14/easycoref.git
+git clone https://github.com/sally14/easycoref.git
 cd easycoref
 ```
 
