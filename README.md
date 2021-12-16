@@ -28,4 +28,11 @@ In order to run neuralcoref and e2ecoref, we need to download the ressources pro
 python -m easycoref download
 ```
 
+Downloading char_vocab.english.txt
+```bash
+cd ./e2e-coref
+curl -O https://lil.cs.washington.edu/coref/char_vocab.english.txt
+cd -
+```
+
 Enjoy! 
