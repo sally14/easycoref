@@ -8,7 +8,7 @@ from pathlib import Path
 import logging
 import requests
 
-
+logging.getLogger().setLevel(logging.INFO)
 
 def download():
     subprocess.check_call("python -m spacy download en".split())
@@ -56,6 +56,7 @@ def download():
         logging.info('3/3 : Starting e2e-coref logs Download...')
         file_id = "1fkifqZzdzsOEo0DXMzCFjiNXqsKG_cHi"
         destination = os.path.join(dst, 'e2e-coref.tgz')
+        print(destination)
         download_file_from_google_drive(file_id, destination)
         logging.info('Done downloading!')
         logging.info('Unzipping...')
@@ -91,7 +92,7 @@ def download_file_from_google_drive(id, destination):
         params = { 'id' : id, 'confirm' : token }
         response = session.get(URL, params = params, stream = True)
 
-    save_response_content(response, destination)    
+    save_response_content(response, destination)
 
 def get_confirm_token(response):
     for key, value in response.cookies.items():
