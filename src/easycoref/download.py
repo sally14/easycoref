@@ -80,10 +80,7 @@ def download():
         logging.info('All done!')
 
     # Compile tensorflow custom C ops 
-    subprocess.check_call("TF_CFLAGS= ( $(python -c 'import tensorflow as tf; print(' '.join(tf.sysconfig.get_compile_flags()))') )".split())
-    subprocess.check_call("TF_LFLAGS=( $(python -c 'import tensorflow as tf; print(' '.join(tf.sysconfig.get_link_flags()))') )".split())
-
-
+    subprocess.check_call('../e2ecoref/install.sh')
     if platform == "linux" or platform == "linux2":
         subprocess.check_call("g++ -std=c++11 -shared coref_kernels.cc -o coref_kernels.so -fPIC ${TF_CFLAGS[@]} ${TF_LFLAGS[@]} -O2 -D_GLIBCXX_USE_CXX11_ABI=0".split())
     elif platform == "darwin":
