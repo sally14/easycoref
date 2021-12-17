@@ -6,6 +6,8 @@ import zipfile
 import tarfile
 from pathlib import Path
 import logging
+import requests
+
 
 
 def download():
@@ -52,14 +54,12 @@ def download():
         logging.info('3/3 : e2e-coref logs already downloaded!')
     else:
         logging.info('3/3 : Starting e2e-coref logs Download...')
-        url_e2elogs = "https://docs.google.com/uc?export=download&id=1fkifqZzdzsOEo0DXMzCFjiNXqsKG_cHi"
-
-        req = request.Request(url_e2elogs, headers={'User-Agent': "Mozilla/5.0"})
-        local_filename, headers = request.urlretrieve(req)
-        print(headers)
+        file_id = "1fkifqZzdzsOEo0DXMzCFjiNXqsKG_cHi"
+        destination = os.path.join(dst, 'e2e-coref.tgz')
+        download_file_from_google_drive(file_id, destination)
         logging.info('Done downloading!')
         logging.info('Unzipping...')
-        with tarfile.open(local_filename,"r:gz") as tar_ref:
+        with tarfile.open(destination,"r:gz") as tar_ref:
             tar_ref.extractall(dst)
             logging.info('Unzipped!')
 
@@ -78,3 +78,32 @@ def download():
     else:
         logging.error('Platform not handled, please use a Unix-based os')
 
+
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+
+    response = session.get(URL, params = { 'id' : id }, stream = True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = { 'id' : id, 'confirm' : token }
+        response = session.get(URL, params = params, stream = True)
+
+    save_response_content(response, destination)    
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
