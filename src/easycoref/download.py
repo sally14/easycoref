@@ -59,16 +59,20 @@ def download():
         print(destination)
         download_file_from_google_drive(file_id, destination)
         logging.info('Done downloading!')
-        logging.info('Unzipping...')
-        with tarfile.open(destination,"r:gz") as tar_ref:
-            tar_ref.extractall(dst)
-            logging.info('Unzipped!')
+        if os.path.exists(destination):
+            logging.info('Unzipping...')
+            with tarfile.open(destination,"r:gz") as tar_ref:
+                tar_ref.extractall(dst)
+                logging.info('Unzipped!')
+                os.remove(destination)
+        else:
+            pass
 
         logging.info('All done!')
 
     # Compile tensorflow custom C ops 
-    subprocess.check_call("TF_CFLAGS=( $(python -c 'import tensorflow as tf; print(" ".join(tf.sysconfig.get_compile_flags()))') )".split())
-    subprocess.check_call("TF_LFLAGS=( $(python -c 'import tensorflow as tf; print(" ".join(tf.sysconfig.get_link_flags()))') )".split())
+    subprocess.check_call("TF_CFLAGS= ( $(python -c 'import tensorflow as tf; print(' '.join(tf.sysconfig.get_compile_flags()))') )".split())
+    subprocess.check_call("TF_LFLAGS=( $(python -c 'import tensorflow as tf; print(' '.join(tf.sysconfig.get_link_flags()))') )".split())
 
 
     if platform == "linux" or platform == "linux2":
