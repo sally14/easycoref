@@ -25,5 +25,5 @@ This is a local install, in the Corefenv conda environment.
 In order to run neuralcoref and e2ecoref, we need to download the ressources provided by the authors. Just run:
 
 ```bash
-python -m easycoref download
+download
 ```
