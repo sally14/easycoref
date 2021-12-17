@@ -8,7 +8,7 @@ from pathlib import Path
 import logging
 
 
-def download_all():
+def download():
     subprocess.check_call("python -m spacy download en".split())
 
     # Create a hidden directory in HOME
