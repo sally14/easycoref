@@ -34,7 +34,7 @@ def download():
     dst = os.path.join(easycoref_path, 'e2e_logs')  # TODO : change embeddings path in e2ecoref
     os.makedirs(dst, mode=511, exist_ok=True)
     local_filename, headers = urlretrieve(url_e2elogs)
-    with tarfile.TarFile(local_filename,"r") as tar_ref:
+    with tarfile.TarFile(local_filename,"r:gz") as tar_ref:
         tar_ref.extractall(dst)
 
 
