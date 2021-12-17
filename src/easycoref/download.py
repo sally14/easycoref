@@ -7,15 +7,24 @@ import tarfile
 from pathlib import Path
 import logging
 import requests
+import argparse
+
 
 logging.getLogger().setLevel(logging.INFO)
 
 def download():
+    parser = argparse.ArgumentParser(prog='download')
+    parser.add_argument('-p', nargs='?', help='help for -p : path (optionnal)')
+    args = parser.parse_args()
+    if args.p is None:
+        home_path=Path.home()
+    else:
+        home_path=args.p
+
     subprocess.check_call("python -m spacy download en".split())
 
-    # Create a hidden directory in HOME
-    home_path = Path.home()
     easycoref_path = os.path.join(home_path, '.easycoref')
+    os.environ['EASYCOREFPATH'] = easycoref_path
     if os.path.exists(easycoref_path):
         logging.info('Ressources already cached, at least in part')
     else:
