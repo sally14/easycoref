@@ -1,8 +1,6 @@
-from genericpath import exists
-import pathlib
 import subprocess
 from sys import platform
-from urllib.request import urlretrieve
+from urllib import request
 import os
 import zipfile
 import tarfile
@@ -31,7 +29,7 @@ def download():
         logging.info('1/3 : Starting Glove Embeddings Download...')
         url = 'http://downloads.cs.stanford.edu/nlp/data/glove.840B.300d.zip'
         os.makedirs(dst, mode=511, exist_ok=True)
-        local_filename, headers = urlretrieve(url)
+        local_filename, headers = request.urlretrieve(url)
         with zipfile.ZipFile(local_filename,"r") as zip_ref:
             zip_ref.extractall(dst)
         logging.info('Done downloading!')
@@ -43,7 +41,7 @@ def download():
     else:
         logging.info('2/3 : Starting Char Vocab Download...')
         url = 'https://lil.cs.washington.edu/coref/char_vocab.english.txt'
-        urlretrieve(url, dst)
+        request.urlretrieve(url, dst)
         logging.info('Done downloading!')
 
     dst = os.path.join(easycoref_path, 'e2e_logs')
@@ -55,10 +53,13 @@ def download():
     else:
         logging.info('3/3 : Starting e2e-coref logs Download...')
         url_e2elogs = "https://docs.google.com/uc?export=download&id=1fkifqZzdzsOEo0DXMzCFjiNXqsKG_cHi"
-        local_filename, headers = urlretrieve(url_e2elogs)
+
+        req = request.Request(url_e2elogs, headers={'User-Agent': "Mozilla/5.0"})
+        local_filename, headers = request.urlretrieve(req)
+        print(headers)
         logging.info('Done downloading!')
         logging.info('Unzipping...')
-        with tarfile.TarFile(local_filename,"r:gz") as tar_ref:
+        with tarfile.open(local_filename,"r:gz") as tar_ref:
             tar_ref.extractall(dst)
             logging.info('Unzipped!')
 
